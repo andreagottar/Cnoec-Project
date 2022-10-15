@@ -61,16 +61,27 @@ theta_dot           =       0;                  % yaw rate initialization
 % Run simulation
 
 % Computation of zout_FFD using Forward Euler Method
+% tic
+% for ind=2:N_FFD
+%     zdot                =      robot_dyn_model(0,zout_FFD(:,ind-1),uout_FFD(:,ind-1),0,th,theta_dot);          % derivatives of the state variables
+%     zout_FFD(:,ind)     =      zout_FFD(:,ind-1)+Ts_FFD*zdot;                                                  % update t given t-1                                   
+%     theta_FFD(1,ind)    =      zout_FFD(3,ind);                                                                 % update of the yaw angle                                               
+%     theta_dot           =      (theta_FFD(1,ind)-theta_FFD(1,ind-1))/Ts_FFD;
+%     %uout_FFD(:,ind)     =      uout_FFD(:,1);
+% %   if (ind >= round(N_FFD/2))
+% %      uout_FFD(:,ind) = [5 0]';  
+% %   end
+% end
+% t_FFD = toc
+
+% Other method to get theta_dot
 tic
 for ind=2:N_FFD
     zdot                =      robot_dyn_model(0,zout_FFD(:,ind-1),uout_FFD(:,ind-1),0,th,theta_dot);          % derivatives of the state variables
     zout_FFD(:,ind)     =      zout_FFD(:,ind-1)+Ts_FFD*zdot;                                                  % update t given t-1                                   
     theta_FFD(1,ind)    =      zout_FFD(3,ind);                                                                 % update of the yaw angle                                               
-    theta_dot           =      (theta_FFD(1,ind)-theta_FFD(1,ind-1))/Ts_FFD;
-    %uout_FFD(:,ind)     =      uout_FFD(:,1);
-%   if (ind >= round(N_FFD/2))
-%      uout_FFD(:,ind) = [5 0]';  
-%   end
+    theta_dot_vec = diff(theta_FFD);
+    theta_dot = theta_dot_vec(ind-1);
 end
 t_FFD = toc
 
@@ -96,14 +107,25 @@ uout_o45(:,1)       =       u;
 theta_o45           =       zeros(1,N_o45);
 
 % Run simulation
+% tic
+% theta_dot = 0;
+% for ind=2:N_o45
+%     zout_temp           =   ode45(@(t,z)robot_dyn_model(t,z,uout_o45(:,ind-1),0,th, theta_dot),[0 Ts_o45],zout_o45(:,ind-1));
+%     zout_o45(:,ind)     =   zout_temp.y(:,end);
+%     theta_o45(1,ind)    =   zout_o45(3,ind);   
+%     theta_dot           =   (theta_o45(1,ind)-theta_o45(1,ind-1))/Ts_FFD;
+%     %uout_o45(:,ind)     =   uout_o45(:,1);
+% end
+% t_o45 = toc
+
 tic
 theta_dot = 0;
 for ind=2:N_o45
     zout_temp           =   ode45(@(t,z)robot_dyn_model(t,z,uout_o45(:,ind-1),0,th, theta_dot),[0 Ts_o45],zout_o45(:,ind-1));
     zout_o45(:,ind)     =   zout_temp.y(:,end);
     theta_o45(1,ind)    =   zout_o45(3,ind);   
-    theta_dot           =   (theta_o45(1,ind)-theta_o45(1,ind-1))/Ts_FFD;
-    %uout_o45(:,ind)     =   uout_o45(:,1);
+    theta_dot_vec = diff(theta_o45);
+    theta_dot = theta_dot_vec(ind-1);
 end
 t_o45 = toc
 
