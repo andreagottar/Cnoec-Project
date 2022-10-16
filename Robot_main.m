@@ -93,7 +93,7 @@ figure(2),p2 = plot(tvec_FFD,zout_FFD(3,:)),grid on, hold on,xlabel('Time (s)'),
 %% Simulation with ode45
 
 % Time integration parameters
-Ts_o45      =       0.1;               % sampling time (s)
+Ts_o45      =       0.01;               % sampling time (s)
 Tend_o45    =       100;                % final time (s)
 tvec_o45    =       0:Ts_o45:Tend_o45;  % time vector (s)
 
@@ -121,11 +121,17 @@ theta_o45           =       zeros(1,N_o45);
 tic
 theta_dot = 0;
 for ind=2:N_o45
-    zout_temp           =   ode45(@(t,z)robot_dyn_model(t,z,uout_o45(:,ind-1),0,th, theta_dot),[0 Ts_o45],zout_o45(:,ind-1));
-    zout_o45(:,ind)     =   zout_temp.y(:,end);
+    [t, zout_temp]      =   ode45(@(t,z)robot_dyn_model(t,z,uout_o45(:,ind-1),0,th, theta_dot),[0 Ts_o45],zout_o45(:,ind-1));
+    zout_ts             =   t(end)/length(t);
+    zout_o45(:,ind)     =   zout_temp(end,:)';
     theta_o45(1,ind)    =   zout_o45(3,ind);   
+<<<<<<< Updated upstream
     theta_dot_vec = diff(theta_o45);
     theta_dot = theta_dot_vec(ind-1);
+=======
+    theta_dot           =   (theta_o45(1,ind)-theta_o45(1,ind-1))/zout_ts;
+    %uout_o45(:,ind)     =   uout_o45(:,1);
+>>>>>>> Stashed changes
 end
 t_o45 = toc
 
